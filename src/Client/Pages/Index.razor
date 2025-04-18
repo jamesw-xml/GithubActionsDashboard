@@ -1,0 +1,46 @@
+﻿@page "/"
+@using global::Shared
+@inject Http HttpClient;
+
+
+<h3>GitHub Actions Dashboard</h3>
+
+@if (Runs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Repo</th>
+                <th>Commit</th>
+                <th>Status</th>
+                <th>Conclusion</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var run in Runs)
+            {
+                <tr>
+                    <td>@run.Repository.Name</td>
+                    <td>@run.Display_Title</td>
+                    <td>@run.Status</td>
+                    <td>@run.Conclusion</td>
+                    <td><a href="@run.Html_Url" target="_blank">View Run</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code{
+
+    private IList<WorkflowRun> Runs = new List<WorkflowRun>();
+    protected override async Task OnInitializedAsync()
+    {
+        Runs = await HttpClient.GetAsync<IList<WorkflowRun>>("/api/github");
+    }
+}
