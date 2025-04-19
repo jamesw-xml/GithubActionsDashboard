@@ -32,4 +32,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/github-actions:latest
+          tags: ghcr.io/jamesw-xml/github-actions:latest
