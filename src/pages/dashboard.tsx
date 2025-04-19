@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getSession } from "next-auth/react";
 import type { Session } from "next-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { GitHubWorkflowRun, RepoWithRun } from "@/types/github";
 
 export async function getServerSideProps(
@@ -39,14 +39,15 @@ export default function Dashboard() {
     };
     fetchOrgs();
   }, []);
+  const fetchRepos = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/github/repos${selectedOrg ? `?org=${selectedOrg}` : ""}`);
+    const data: RepoWithRun[] = await res.json();
+    setRepos(data);
+    setLoading(false);
+  }, [selectedOrg]);
+
   useEffect(() => {
-    const fetchRepos = async () => {
-      setLoading(true);
-      const res = await fetch(`/api/github/repos${selectedOrg ? `?org=${selectedOrg}` : ""}`);
-      const data: RepoWithRun[] = await res.json();
-      setRepos(data);
-      setLoading(false);
-    };
     fetchRepos();
   }, [selectedOrg]);
 
@@ -72,6 +73,12 @@ export default function Dashboard() {
           </option>
         ))}
       </select>
+      <button
+        onClick={fetchRepos}
+        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-md transition duration-200"
+      >
+        🔄 Refresh
+      </button>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -146,7 +153,7 @@ export default function Dashboard() {
                             body: JSON.stringify(x),
                           });
                         });
-                        window.location.reload();
+                        await fetchRepos();
                       }}
                       className="ml-4 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-1.5 rounded-md transition duration-200"
                     >
