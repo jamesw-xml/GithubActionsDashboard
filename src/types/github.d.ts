@@ -28,13 +28,28 @@ export interface GitHubRepo {
   owner: {
     login: string;
   };
+  issues: Issue[];
 }
 
-export type RepoWithRun = {
+export type RepoWithRun = GitHubRepo & {
   id: number;
   name: string;
   full_name: string;
   description: string | null;
   html_url: string;
   latest_run: GitHubWorkflowRun | null;
+};
+
+export type Issue = {
+  id: number;
+  title: string;
+  body: string;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  comments_url: string;
+  state: string;
+  user: {
+    login: string;
+  };
 };

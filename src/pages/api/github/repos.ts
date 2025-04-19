@@ -1,6 +1,6 @@
 import { getToken } from "next-auth/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
-import type { GitHubRepo, RepoWithRun, GitHubWorkflowRunsResponse } from "@/types/github";
+import type { GitHubRepo, RepoWithRun, GitHubWorkflowRunsResponse, Issue } from "@/types/github";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -39,12 +39,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         const runsData: GitHubWorkflowRunsResponse = await runsRes.json();
         const latestRun = runsData.workflow_runs?.[0];
 
+        if (runsData.workflow_runs.some((run) => run.status === "in_progress")) {
+          const issues = await fetch(
+            `${GITHUB_API}/repos/${repo.owner.login}/${repo.name}/issues?state=open`,
+            {
+              headers: {
+                Authorization: `Bearer ${token.accessToken}`,
+                Accept: "application/vnd.github+json",
+              },
+            }
+          );
+          repo.issues = await issues.json();
+          repo.issues = repo.issues.filter(
+            (issue: Issue) =>
+              issue.title.toLowerCase().includes("manual approval required") &&
+              issue.state != "closed"
+          );
+          repo.issues = repo.issues.map((issue: Issue) => {
+            return {
+              ...issue,
+              approve: async () => {},
+            };
+          });
+        }
+
         return {
-          id: repo.id,
-          name: repo.name,
-          full_name: repo.full_name,
-          description: repo.description,
-          html_url: repo.html_url,
+          ...repo,
           latest_run: latestRun ? latestRun : null,
         } as RepoWithRun;
       })
