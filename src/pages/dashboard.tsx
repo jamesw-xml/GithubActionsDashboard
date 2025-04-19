@@ -137,33 +137,33 @@ export default function Dashboard() {
                   </span>
                   <span>{repo.latest_run ? formatRunDuration(repo.latest_run) : "-"}</span>
                 </div>
-              </div>
-              {repo.issues?.length > 0 ? (
-                <>
-                  <span className="bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md">
-                    Manual Approval Required
-                    <button
-                      onClick={async () => {
-                        repo.issues.forEach(async (x) => {
-                          await fetch("/api/github/approve", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(x),
+                {repo.issues?.length > 0 ? (
+                  <>
+                    <span className="bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md">
+                      Manual Approval Required
+                      <button
+                        onClick={async () => {
+                          repo.issues.forEach(async (x) => {
+                            await fetch("/api/github/approve", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify(x),
+                            });
                           });
-                        });
-                        await fetchRepos();
-                      }}
-                      className="ml-4 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-1.5 rounded-md transition duration-200"
-                    >
-                      Approve
-                    </button>
-                  </span>
-                </>
-              ) : (
-                <span className="text-gray-500 text-sm">No issues</span>
-              )}
+                          await fetchRepos();
+                        }}
+                        className="ml-4 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-1.5 rounded-md transition duration-200"
+                      >
+                        Approve
+                      </button>
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-gray-500 text-sm">No issues</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
