@@ -13,10 +13,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     // Step 1: Get all repos (user or org)
-    const orgEnv = process.env.GITHUB_ORG;
-    const path = orgEnv ? `/orgs/${orgEnv}/repos` : "/user/repos";
-    console.log("Fetching repos from path:", path);
-    const repoRes = await fetch(`${GITHUB_API}${path}`, {
+    const org = req.query.org;
+    const url = org ? `${GITHUB_API}/orgs/${org}/repos` : `${GITHUB_API}/user/repos`;
+    const repoRes = await fetch(`${url}`, {
       headers: {
         Authorization: `Bearer ${token.accessToken}`,
         Accept: "application/vnd.github+json",

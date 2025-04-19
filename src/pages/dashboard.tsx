@@ -27,16 +27,28 @@ export default function Dashboard() {
   const [repos, setRepos] = useState<RepoWithRun[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [, tick] = useState<number>(0); // used for timer refresh
+  const [orgs, setOrgs] = useState<string[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<string>("");
 
+  // Fetch orgs on load
+  useEffect(() => {
+    const fetchOrgs = async () => {
+      const res = await fetch("/api/github/orgs");
+      const data = await res.json();
+      setOrgs(data);
+    };
+    fetchOrgs();
+  }, []);
   useEffect(() => {
     const fetchRepos = async () => {
-      const res = await fetch("/api/github/repos");
+      setLoading(true);
+      const res = await fetch(`/api/github/repos${selectedOrg ? `?org=${selectedOrg}` : ""}`);
       const data: RepoWithRun[] = await res.json();
       setRepos(data);
       setLoading(false);
     };
     fetchRepos();
-  }, []);
+  }, [selectedOrg]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -48,6 +60,18 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#1e1e1e] text-white px-8 py-6">
       <h1 className="text-2xl font-semibold mb-6">Recently Run Pipelines</h1>
+      <select
+        value={selectedOrg}
+        onChange={(e) => setSelectedOrg(e.target.value)}
+        className="bg-[#2e2e2e] text-white px-3 py-2 rounded"
+      >
+        <option value="">All Orgs</option>
+        {orgs.map((org) => (
+          <option key={org} value={org}>
+            {org}
+          </option>
+        ))}
+      </select>
       {loading ? (
         <p>Loading...</p>
       ) : (
