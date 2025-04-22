@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     // Step 1: Get all repos (user or org)
     const org = req.query.org;
-    const url = org ? `${GITHUB_API}/orgs/${org}/repos` : `${GITHUB_API}/user/repos`;
+    const url = org ? `${GITHUB_API}/orgs/${org}/repos` : `${GITHUB_API}/user/repos?per_page=100`;
     const repoRes = await fetch(`${url}`, {
       headers: {
         Authorization: `Bearer ${token.accessToken}`,
