@@ -70,17 +70,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       })
     );
 
-    return res
-      .status(200)
-      .json(
-        reposWithRuns
-          .filter((repo) => repo.latest_run !== null)
-          .sort(
-            (a, b) =>
-              new Date(b.latest_run.updated_at).getTime() -
-              new Date(a.latest_run.updated_at).getTime()
-          )
-      );
+    return res.status(200).json(
+      reposWithRuns
+        .filter((repo) => repo.latest_run !== null)
+        .sort((a, b) => {
+          if (a === null || a.latest_run == null) return 1;
+          if (b === null || b.latest_run == null) return -1;
+          return (
+            new Date(b.latest_run.updated_at).getTime() -
+            new Date(a.latest_run.updated_at).getTime()
+          );
+        })
+    );
   } catch (error) {
     console.error("Error fetching repos or workflows:", error);
     return Promise.reject({ error: "Failed to fetch GitHub data" });
